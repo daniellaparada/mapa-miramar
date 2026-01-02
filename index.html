@@ -1,45 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Mapa y visor de plátanos - Miramar</title>
+    <title>🌳 Inventario de plátanos urbanos en Miramar</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        /* Diseño de pantalla dividida idéntico al que te gustó */
-        html, body { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; }
+        /* ESTILO GENERAL */
+        html, body { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; background: #f0f2f5; }
         
+        /* 1. CABEZAL MEJORADO */
         #header {
-            flex: 0 0 auto; background: #2c3e50; color: white; padding: 15px 20px;
+            flex: 0 0 auto; background: #2c3e50; color: white; padding: 10px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 4px solid #27ae60;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 10;
         }
-        h3 { margin: 0; }
-        #info-seleccion { font-size: 0.9rem; color: #ecf0f1; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px;}
 
-        #container { flex: 1; display: flex; width: 100%; }
-        #map-canvas { flex: 1; border-right: 4px solid #333; }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand h1 { margin: 0; font-size: 1.2rem; font-weight: 600; letter-spacing: 0.5px; }
+        .brand span { background: #27ae60; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+
+        /* Controles del medio */
+        #info-panel { 
+            background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; 
+            font-size: 0.9rem; color: #ecf0f1; display: flex; align-items: center; gap: 10px;
+        }
+
+        /* Botones derecha */
+        .btn-group { display: flex; gap: 10px; }
+        button {
+            border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;
+        }
+        .btn-csv { background: #e67e22; color: white; }
+        .btn-csv:hover { background: #d35400; }
+        .btn-help { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; }
+        .btn-help:hover { background: rgba(255,255,255,0.1); }
+
+        /* 2. BARRA DE TITULOS DE PANELES */
+        #panel-titles {
+            display: flex; background: #34495e; color: #bdc3c7; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;
+        }
+        .title-box { flex: 1; padding: 5px 10px; text-align: center; border-right: 1px solid #455a64; }
+        .title-box:last-child { border: none; }
+
+        /* 3. CONTENEDOR PRINCIPAL */
+        #container { flex: 1; display: flex; width: 100%; position: relative; }
+        #map-canvas { flex: 1; border-right: 2px solid #ddd; }
         #pano-canvas { flex: 1; }
+
+        /* MODAL DE AYUDA */
+        #modal-ayuda {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 8px; max-width: 500px; position: relative;
+        }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: #aaa; }
     </style>
 </head>
 <body>
 
     <div id="header">
-        <div>
-            <h3>🌳 Mapa de Plátanos</h3>
-            <div style="font-size:0.8rem; color:#bdc3c7;">Clic en un punto verde del mapa de la izquierda para ver el árbol a la derecha. </div>
+        <div class="brand">
+            <h1>🌳 Plátanos urbanos en Miramar</h1>
+            <span>Versión 2.11</span>
         </div>
-        <div id="info-seleccion">Seleccionar un árbol...</div>
+
+        <div id="info-panel">
+            <span id="txt-seleccion">👈 Seleccionar un punto en el mapa</span>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-help" onclick="toggleAyuda()">❓ Ayuda</button>
+            <button class="btn-csv" onclick="descargarCSV()">⬇️ Bajar datos</button>
+        </div>
+    </div>
+
+    <div id="panel-titles">
+        <div class="title-box">🗺️ Mapa de ubicación (Calles)</div>
+        <div class="title-box">📸 Vista de calle (Street View)</div>
     </div>
 
     <div id="container">
-        <div id="map-canvas"></div> <div id="pano-canvas"></div> </div>
+        <div id="map-canvas"></div>
+        <div id="pano-canvas"></div>
+    </div>
+
+    <div id="modal-ayuda" onclick="toggleAyuda()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="toggleAyuda()">&times;</span>
+            <h2>Cómo usar este visor</h2>
+            <p>1. <b>Navegar</b> por el mapa de la izquierda (usar la rueda del mouse para zoom).</p>
+            <p>2. Los puntos <b>verdes</b> 🟢 son árboles relevados.</p>
+            <p>3. <b>Hacer clic</b> en un punto para ver su foto.</p>
+            <p>4. Street View (derecha) gira para enfocar el árbol en la vereda. Si no se enfoca, girar manualmente.</p>
+            <p>5. Para bajar los datos, usar el botón naranja de descarga.</p>
+        </div>
+    </div>
 
     <script>
-        // 👇👇👇 ZONA DE DATOS 👇👇👇
+        // 👇👇👇 ZONA DE DATOS (NO BORRES ESTO AL ACTUALIZAR) 👇👇👇
         
-        // BORRA ESTOS CORCHETES VACÍOS Y PEGA LO QUE TE DIÓ R AQUÍ:
         const MIS_ARBOLES = [
-            
-             { lat: -38.2704273926889, lng: -57.8414524317812},
+                   { lat: -38.2704273926889, lng: -57.8414524317812},
   { lat: -38.2703694833859, lng: -57.8413826943468},
   { lat: -38.2703242088079, lng: -57.8413317323755},
   { lat: -38.2702873573863, lng: -57.8412834526132},
@@ -943,59 +1006,49 @@
   { lat: -38.2651173052633, lng: -57.841415121374},
   { lat: -38.2641344412705, lng: -57.8426897013716},
   { lat: -38.2668447266862, lng: -57.8358729933126},
-
         ];
 
         // 👆👆👆 FIN ZONA DE DATOS 👆👆👆
 
         let map;
         let panorama;
-        let lastMarker = null; // Para recordar cuál fue el último seleccionado
+        let lastMarker = null;
 
         function initMap() {
-            // 1. Centrar el mapa en el primer árbol de la lista (para no errarle)
             const centroInicial = MIS_ARBOLES.length > 0 ? MIS_ARBOLES[0] : { lat: -38.2715, lng: -57.8428 };
 
-            // 2. Mapa satelital (izquierda)
+            // 1. MAPA DE CALLES (Roadmap)
             map = new google.maps.Map(document.getElementById("map-canvas"), {
                 center: centroInicial,
                 zoom: 16,
-                mapTypeId: 'satellite',
-                streetViewControl: false, 
-                fullscreenControl: false
+                mapTypeId: 'roadmap', // 👈 CAMBIO: Ya no es satelital
+                streetViewControl: false,
+                fullscreenControl: false,
+                clickableIcons: false // Evita clics en negocios/paradas de bus
             });
 
-            // 3. Street View (Derecha)
+            // 2. STREET VIEW
             panorama = new google.maps.StreetViewPanorama(
                 document.getElementById("pano-canvas"),
                 {
                     position: centroInicial,
-                    pov: { heading: 0, pitch: 10 },
-                    motionTracking: false
+                    pov: { heading: 0, pitch: 5 },
+                    motionTracking: false,
+                    addressControlOptions: { position: google.maps.ControlPosition.BOTTOM_CENTER }
                 }
             );
-
-            // Vinculamos (opcional, pero ayuda a ver el cono de visión)
             map.setStreetView(panorama);
 
-            // 4. DIBUJAR LOS 905 PUNTOS
-            // Usamos un icono verde pequeño para que no tapen todo el mapa
+            // 3. LOGICA DE MARCADORES
             const iconoArbol = {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 4,
-                fillColor: "#2ecc71", // Verde
-                fillOpacity: 0.8,
-                strokeWeight: 1,
-                strokeColor: "white"
+                path: google.maps.SymbolPath.CIRCLE, scale: 5,
+                fillColor: "#2ecc71", fillOpacity: 0.9,
+                strokeWeight: 1, strokeColor: "#27ae60"
             };
-
             const iconoSeleccionado = {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: "#e74c3c", // Rojo
-                fillOpacity: 1,
-                strokeWeight: 3,
-                strokeColor: "white"
+                path: google.maps.SymbolPath.CIRCLE, scale: 9,
+                fillColor: "#e67e22", fillOpacity: 1, // Naranja al seleccionar
+                strokeWeight: 3, strokeColor: "white"
             };
 
             MIS_ARBOLES.forEach((arbol, index) => {
@@ -1003,33 +1056,81 @@
                     position: { lat: arbol.lat, lng: arbol.lng },
                     map: map,
                     icon: iconoArbol,
-                    title: `Árbol #${index + 1} (${arbol.fecha})`
+                    title: `Árbol #${index + 1}`
                 });
 
-                // 5. LA MAGIA: Al hacer clic en un punto
                 marker.addListener("click", () => {
-                    // a) Cambiar el Street View de la derecha a esta posición
-                    panorama.setPosition({ lat: arbol.lat, lng: arbol.lng });
-                    
-                    // b) Actualizar info del cabezal
-                    document.getElementById("info-seleccion").innerText = 
-                        `Viendo árbol de ID #${index + 1}`;
-
-                    // c) Efecto visual: Poner rojo el seleccionado y volver el anterior a verde
-                    if (lastMarker) { lastMarker.setIcon(iconoArbol); }
-                    marker.setIcon(iconoSeleccionado);
-                    lastMarker = marker;
-                    
-                    // d) Orientar la cámara hacia el árbol (Truco: miramos hacia el marcador)
-                    // Como el marcador está en la vereda y el coche en la calle, 
-                    // a veces hay que ajustar el 'heading', pero esto ayuda.
+                    seleccionarArbol(arbol, marker, index);
                 });
             });
+        }
+
+        // FUNCIÓN CENTRAL: Mueve mapas y calcula ángulos
+        function seleccionarArbol(datosArbol, marker, index) {
+            // A. Actualizar UI
+            document.getElementById("txt-seleccion").innerText = `🌲 Viendo Árbol #${index + 1} (${datosArbol.fecha})`;
+            if (lastMarker) lastMarker.setIcon({ ...lastMarker.getIcon(), scale: 5, fillColor: "#2ecc71" });
+            marker.setIcon({ ...marker.getIcon(), scale: 9, fillColor: "#e67e22" });
+            lastMarker = marker;
+
+            // B. Mover Street View cerca del árbol
+            const posicionArbol = new google.maps.LatLng(datosArbol.lat, datosArbol.lng);
+            
+            // Usamos StreetViewService para encontrar la foto más cercana (radius 50m)
+            const svService = new google.maps.StreetViewService();
+            svService.getPanorama({ location: posicionArbol, radius: 50 }, (data, status) => {
+                if (status === "OK") {
+                    const ubicacionCoche = data.location.latLng; // Donde está la cámara
+                    
+                    // C. CALCULO MATEMÁTICO (La Magia 🎯)
+                    // Calculamos el ángulo desde el Coche -> hacia el Árbol
+                    const headingCorrecto = google.maps.geometry.spherical.computeHeading(
+                        ubicacionCoche, 
+                        posicionArbol
+                    );
+
+                    // Aplicamos posición y ángulo calculado
+                    panorama.setPano(data.location.pano);
+                    panorama.setPov({
+                        heading: headingCorrecto,
+                        pitch: 5 // Un poquito para arriba
+                    });
+                    panorama.setVisible(true);
+
+                } else {
+                    console.warn("No se encontró Street View para este punto");
+                }
+            });
+            
+            // Centrar mapa izquierdo también
+            map.panTo(posicionArbol);
+        }
+
+        // DESCARGAR CSV
+        function descargarCSV() {
+            if (MIS_ARBOLES.length === 0) { alert("No hay datos cargados."); return; }
+            
+            let csvContent = "data:text/csv;charset=utf-8,Latitud,Longitud,Fecha\n";
+            MIS_ARBOLES.forEach(row => {
+                csvContent += `${row.lat},${row.lng},${row.fecha}\r\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "relevamiento_platanos_export.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function toggleAyuda() {
+            const modal = document.getElementById('modal-ayuda');
+            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
         }
     </script>
 
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2XkhKe29cI3NVr0G4oo-1gsTqSMInr0s&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2XkhKe29cI3NVr0G4oo-1gsTqSMInr0s&libraries=geometry&callback=initMap">
     </script>
 </body>
 </html>
