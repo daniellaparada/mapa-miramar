@@ -1015,27 +1015,28 @@
 
         function initMap() {
 	// CONFIGURACIÓN DE INICIO:
-            // Intentamos arrancar en el Árbol ID 661 (Índice 660)
-            // Si la lista es muy corta, arrancamos en el primero (0)
-            const indiceInicio = MIS_ARBOLES.length > 660 ? 660 : 0;
-            const centroInicial = MIS_ARBOLES.length > 0 ? MIS_ARBOLES[indiceInicio] : { lat: -38.2687897, lng: -57.8394692 };
+        const INICIO_LAT = -38.2687077;
+        const INICIO_LNG = -57.8393609;
+        const INICIO_HEADING = 225.87; 
+        const INICIO_PITCH = 3;  
 
-            // 1. MAPA DE CALLES (Roadmap)
+        function initMap() {
+            // 1. MAPA CALLES
             map = new google.maps.Map(document.getElementById("map-canvas"), {
-                center: centroInicial,
-                zoom: 16,
-                mapTypeId: 'roadmap', // No es satelital
+                center: { lat: INICIO_LAT, lng: INICIO_LNG },
+                zoom: 19, 
+                mapTypeId: 'roadmap', 
                 streetViewControl: false,
                 fullscreenControl: false,
-                clickableIcons: false // Evita clics en negocios/paradas
+                clickableIcons: false 
             });
 
             // 2. STREET VIEW
             panorama = new google.maps.StreetViewPanorama(
                 document.getElementById("pano-canvas"),
                 {
-                    position: centroInicial,
-                    pov: { heading: 20, pitch: 5 },
+                    position: { lat: INICIO_LAT, lng: INICIO_LNG },
+                    pov: { heading: INICIO_HEADING, pitch: INICIO_PITCH },
                     motionTracking: false,
                     addressControlOptions: { position: google.maps.ControlPosition.BOTTOM_CENTER }
                 }
