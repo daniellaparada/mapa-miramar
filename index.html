@@ -89,11 +89,11 @@
     <div id="modal-ayuda" onclick="toggleAyuda()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <span class="close-btn" onclick="toggleAyuda()">&times;</span>
-            <h2>Cómo usar este visor</h2>
-            <p>1. <b>Navegar</b> por el mapa de la izquierda (usar la rueda del mouse para zoom).</p>
-            <p>2. Los puntos <b>verdes</b> 🟢 son árboles relevados.</p>
+            <h2>¿Cómo usar este visor?</h2>
+            <p>1. <b>Navegar</b> por el mapa de la izquierda (usar la rueda del mouse para hacer zoom).</p>
+            <p>2. Los puntos <b>verdes</b> 🟢 son árboles relevados. Haciendo zoom en el mapa de la izquierda se puede ver en qué vereda fue relevado.</p>
             <p>3. <b>Hacer clic</b> en un punto para ver su foto.</p>
-            <p>4. Street View (derecha) gira para enfocar el árbol en la vereda. Si no se enfoca, girar manualmente.</p>
+            <p>4. Street View (derecha) gira para enfocar el árbol en la vereda. Si no se enfoca, automáticamente, girar manualmente.</p>
             <p>5. Para bajar los datos, usar el botón naranja de descarga.</p>
         </div>
     </div>
@@ -544,7 +544,6 @@
   { lat: -38.2735863567389, lng: -57.8408821230275},
   { lat: -38.27391183872, lng: -57.8403611764516},
   { lat: -38.2754242978469, lng: -57.8419361186591},
-  { lat: -38.2756930934776, lng: -57.8414731541062},
   { lat: -38.2770535855593, lng: -57.8397913197769},
   { lat: -38.2776630352985, lng: -57.8385154474864},
   { lat: -38.2776051317655, lng: -57.8384631444106},
@@ -1068,7 +1067,7 @@
         // FUNCIÓN CENTRAL: Mueve mapas y calcula ángulos
         function seleccionarArbol(datosArbol, marker, index) {
             // A. Actualizar UI
-            document.getElementById("txt-seleccion").innerText = `🌲 Viendo Árbol #${index + 1} (${datosArbol.fecha})`;
+            document.getElementById("txt-seleccion").innerText = `🌲 Viendo Árbol #${index + 1}`;
             if (lastMarker) lastMarker.setIcon({ ...lastMarker.getIcon(), scale: 5, fillColor: "#2ecc71" });
             marker.setIcon({ ...marker.getIcon(), scale: 9, fillColor: "#e67e22" });
             lastMarker = marker;
@@ -1110,9 +1109,9 @@
         function descargarCSV() {
             if (MIS_ARBOLES.length === 0) { alert("No hay datos cargados."); return; }
             
-            let csvContent = "data:text/csv;charset=utf-8,Latitud,Longitud,Fecha\n";
+            let csvContent = "data:text/csv;charset=utf-8,Latitud,Longitud\n";
             MIS_ARBOLES.forEach(row => {
-                csvContent += `${row.lat},${row.lng},${row.fecha}\r\n`;
+                csvContent += `${row.lat},${row.lng}\r\n`;
             });
             
             const encodedUri = encodeURI(csvContent);
