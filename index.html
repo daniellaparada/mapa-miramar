@@ -1014,7 +1014,11 @@
         let lastMarker = null;
 
         function initMap() {
-            const centroInicial = MIS_ARBOLES.length > 0 ? MIS_ARBOLES[0] : { lat: -38.2715, lng: -57.8428 };
+	// CONFIGURACIÓN DE INICIO:
+            // Intentamos arrancar en el Árbol ID 661 (Índice 660)
+            // Si la lista es muy corta, arrancamos en el primero (0)
+            const indiceInicio = MIS_ARBOLES.length > 660 ? 660 : 0;
+            const centroInicial = MIS_ARBOLES.length > 0 ? MIS_ARBOLES[indiceInicio] : { lat: -38.2686, lng: -57.8394 };
 
             // 1. MAPA DE CALLES (Roadmap)
             map = new google.maps.Map(document.getElementById("map-canvas"), {
