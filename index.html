@@ -1018,16 +1018,16 @@
             // Intentamos arrancar en el Árbol ID 661 (Índice 660)
             // Si la lista es muy corta, arrancamos en el primero (0)
             const indiceInicio = MIS_ARBOLES.length > 660 ? 660 : 0;
-            const centroInicial = MIS_ARBOLES.length > 0 ? MIS_ARBOLES[indiceInicio] : { lat: -38.2686, lng: -57.8394 };
+            const centroInicial = MIS_ARBOLES.length > 0 ? MIS_ARBOLES[indiceInicio] : { lat: -38.2687897, lng: -57.8394692 };
 
             // 1. MAPA DE CALLES (Roadmap)
             map = new google.maps.Map(document.getElementById("map-canvas"), {
                 center: centroInicial,
                 zoom: 16,
-                mapTypeId: 'roadmap', // 👈 CAMBIO: Ya no es satelital
+                mapTypeId: 'roadmap', // No es satelital
                 streetViewControl: false,
                 fullscreenControl: false,
-                clickableIcons: false // Evita clics en negocios/paradas de bus
+                clickableIcons: false // Evita clics en negocios/paradas
             });
 
             // 2. STREET VIEW
@@ -1035,7 +1035,7 @@
                 document.getElementById("pano-canvas"),
                 {
                     position: centroInicial,
-                    pov: { heading: 0, pitch: 5 },
+                    pov: { heading: 20, pitch: 5 },
                     motionTracking: false,
                     addressControlOptions: { position: google.maps.ControlPosition.BOTTOM_CENTER }
                 }
@@ -1071,7 +1071,7 @@
         // FUNCIÓN CENTRAL: Mueve mapas y calcula ángulos
         function seleccionarArbol(datosArbol, marker, index) {
             // A. Actualizar UI
-            document.getElementById("txt-seleccion").innerText = `🌲 Viendo Árbol #${index + 1}`;
+            document.getElementById("txt-seleccion").innerText = `🌲 Viendo árbol #${index + 1}`;
             if (lastMarker) lastMarker.setIcon({ ...lastMarker.getIcon(), scale: 5, fillColor: "#2ecc71" });
             marker.setIcon({ ...marker.getIcon(), scale: 9, fillColor: "#e67e22" });
             lastMarker = marker;
@@ -1085,14 +1085,14 @@
                 if (status === "OK") {
                     const ubicacionCoche = data.location.latLng; // Donde está la cámara
                     
-                    // C. CALCULO MATEMÁTICO (La Magia 🎯)
-                    // Calculamos el ángulo desde el Coche -> hacia el Árbol
+                    // C. CALCULO
+                    // Calculamos el ángulo desde el auto -> hacia el Árbol
                     const headingCorrecto = google.maps.geometry.spherical.computeHeading(
                         ubicacionCoche, 
                         posicionArbol
                     );
 
-                    // Aplicamos posición y ángulo calculado
+                    // Aplicamos posición y ángulo 
                     panorama.setPano(data.location.pano);
                     panorama.setPov({
                         heading: headingCorrecto,
